@@ -53,4 +53,3 @@ echo "git pull && git co master && git pull && git co $CURRENT_BRANCH" \
 	&& git flow release finish -mrelease/$VERSION $VERSION \
 	&& echo "git push --all && git push --tags" \
 	&& git push --all && git push --tags
-fi
