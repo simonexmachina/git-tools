@@ -13,6 +13,9 @@ fi
 
 if [ -z "$VERSION" -o -z "$MESSAGE" ]; then
 	echo "Usage: $0 <new version> <message>"
+	CURRENT_BRANCH=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
+	echo "git pull to update VERSION..."
+	git pull
 	echo "Current version: `cat $VERSION_FILE`"
 	exit
 fi

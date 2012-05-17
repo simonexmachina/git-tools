@@ -13,6 +13,8 @@ fi
 
 if [ -z "$VERSION" -o -z "$MESSAGE" ]; then
 	echo "Usage: $0 <new version> <message>"
+	echo "git pull to update VERSION..."
+	git pull
 	echo "Current version: `cat $VERSION_FILE`"
 	exit
 fi
