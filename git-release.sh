@@ -49,7 +49,7 @@ echo "git pull && git co master && git pull && git co $CURRENT_BRANCH" \
 	&& echo "git flow release start $VERSION" \
 	&& git flow release start $VERSION \
 	&& echo $VERSION > $VERSION_FILE \
-	&& prependToFile $CHANGELOG_FILE "# Release $VERSION\n\n$MESSAGE\n" \
+	&& prependToFile $CHANGELOG_FILE "## $VERSION\n\n$MESSAGE\n" \
 	&& echo "git commit -a" \
 	&& git commit -m "Release $VERSION: $MESSAGE" -a \
 	&& echo "git flow release finish -mrelease/$VERSION $VERSION" \

@@ -13,7 +13,7 @@ fi
 
 if [ -z "$VERSION" -o -z "$MESSAGE" ]; then
 	echo "Usage: $0 <new version> <message>"
-	echo "git pull to update VERSION..."
+	echo "git pull to update VERSION"
 	git pull
 	echo "Current version: `cat $VERSION_FILE`"
 	exit
@@ -30,8 +30,8 @@ if [ -f $FILE ]; then
 	exit 1
 fi
 
-git ls-files -md > $FILE
-git diff --name-only --diff-filter=A HEAD >> $FILE
+git diff --name-only --diff-filter=ACDMRTUX > $FILE
+git diff --cached --name-only --diff-filter=ACDMRTUX >> $FILE
 CHANGED_FILES=`cat $FILE`
 rm $FILE
 
@@ -63,14 +63,14 @@ if [ $NO_STASH -ne 1 ]; then
 		exit 1
 	fi
 fi
-if [ $FAILED -eq 1 ]; then
+if [ "$FAILED" -eq 1 ]; then
 	exit 1
 else
 	echo $VERSION > $VERSION_FILE \
-		&& prependToFile $CHANGELOG_FILE "# Hotfix $VERSION\n\n$MESSAGE\n" \
+		&& prependToFile $CHANGELOG_FILE "## $VERSION\n\n$MESSAGE\n" \
 		&& echo "git commit" \
 		&& git add $VERSION_FILE $CHANGELOG_FILE \
-		&& git commit -m "Hotfix $VERSION: $MESSAGE" $CHANGED_FILES $VERSION_FILE $CHANGELOG_FILE \
+		&& git commit -m "Release $VERSION: $MESSAGE" $CHANGED_FILES $VERSION_FILE $CHANGELOG_FILE \
 		&& echo "git flow hotfix finish -mhotfix/$VERSION $VERSION" \
 		&& git flow hotfix finish -mhotfix/$VERSION $VERSION \
 		&& echo "git push --all && git push --tags" \
