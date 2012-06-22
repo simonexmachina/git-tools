@@ -44,6 +44,6 @@ else
 		&& git commit -m "$VERSION: $MESSAGE" $CHANGED_FILES $VERSION_FILE $CHANGELOG_FILE \
 		&& echo "git flow hotfix finish -mhotfix/$VERSION $VERSION" \
 		&& git flow hotfix finish -mhotfix/$VERSION $VERSION \
-		&& echo "git push --all && git push --tags" \
-		&& git push --all && git push --tags
+		&& echo "git push origin master --tags && git co develop && git push origin develop" \
+		&& git push origin master --tags && git co develop && git push origin develop
 fi

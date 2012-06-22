@@ -23,5 +23,5 @@ echo "git pull && git co master && git pull && git co $CURRENT_BRANCH" \
 	&& git commit -m "$VERSION: $MESSAGE" -a \
 	&& echo "git flow release finish -mrelease/$VERSION $VERSION" \
 	&& git flow release finish -mrelease/$VERSION $VERSION \
-	&& echo "git push --all && git push --tags" \
-	&& git push --all && git push --tags
+	&& echo "git push origin master --tags && git co develop && git push origin develop" \
+	&& git push origin master --tags && git co develop && git push origin develop
