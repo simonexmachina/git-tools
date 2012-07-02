@@ -4,9 +4,6 @@ export CHANGELOG_FILE="CHANGELOG.md"
 export VERSION_FILE="VERSION"
 CHANGE_FILE="._changed-files.txt"
 
-printUsage() {
-	echo "Usage: $0 <new version> <message>"
-}
 prependToFile() {
 	echo -e $2 | cat - $1 > .git-hotfix-tmp
 	mv .git-hotfix-tmp $1
@@ -18,6 +15,17 @@ getChangedFiles() {
 	CHANGED_FILES=`cat $CHANGE_FILE`
 	rm $CHANGE_FILE
 	echo $CHANGED_FILES
+}
+getCurrentBranch() {
+	git branch | sed -n -e 's/^\* \(.*\)/\1/p'
+}
+updateVersion() {
+	echo "### Current VERSION file has version `cat VERSION`"
+	echo "### Calling git pull to update VERSION..."
+	CURRENT_BRANCH=`getCurrentBranch`
+	git co master && git pull
+	echo "### Current version: `cat $VERSION_FILE`"
+	git co $CURRENT_BRANCH
 }
 
 if [ "$1" = "-h" ]; then
@@ -31,12 +39,4 @@ fi
 if [ ! -f $CHANGELOG_FILE -o ! -f $VERSION_FILE ]; then
 	echo "ERROR: $VERSION_FILE and $CHANGELOG_FILE must exist"
 	exit 1
-fi
-export CURRENT_BRANCH=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
-if [ -z "$VERSION" -o -z "$MESSAGE" ]; then
-	printUsage
-	echo "Calling git pull to update VERSION..."
-	git pull
-	echo "Current version: `cat $VERSION_FILE`"
-	exit
 fi
