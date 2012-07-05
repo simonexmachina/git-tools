@@ -21,11 +21,9 @@ getCurrentBranch() {
 }
 updateVersion() {
 	echo "### Current VERSION file has version `cat VERSION`"
-	echo "### Calling git pull to update VERSION..."
-	CURRENT_BRANCH=`getCurrentBranch`
-	git co master && git pull
-	echo "### Current version: `cat $VERSION_FILE`"
-	git co $CURRENT_BRANCH
+	echo "### Calling git fetch to get VERSION from origin..."
+	git fetch
+	echo "### Current version: `git show origin/master:VERSION`"
 }
 
 if [ "$1" = "-h" ]; then

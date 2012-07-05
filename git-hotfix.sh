@@ -1,24 +1,24 @@
 #!/bin/bash
 
-HOTFIX=$1
+VERSION=$1
 ACTION=$2
-VERSION=$3
-MESSAGE=$4
+MESSAGE=$3
 
 printUsage() {
-	echo "Usage: $0 <hotfix id> <start|finish> [new version] [message]"
+	echo "Usage: $0 <version> <start|finish|both> [message]"
 }
 
 REALPATH=$(readlink $0)
 DIR=`dirname $REALPATH`
 source "$DIR/git-common.sh"
 
-if [ -z `echo $ACTION | egrep "^(start|finish)$"` ]; then
-	echo "ERROR: Invalid action '$ACTION' specified"
+if [ -z "$VERSION" ]; then
 	printUsage
+	updateVersion
 	exit 1
 fi
-if [ -z "$HOTFIX" ]; then
+if [ -z `echo $ACTION | egrep "^(start|finish|both)$"` ]; then
+	echo "ERROR: Invalid action '$ACTION' specified"
 	printUsage
 	exit 1
 fi
@@ -27,7 +27,7 @@ CHANGED_FILES=$(getChangedFiles)
 CURRENT_BRANCH=$(getCurrentBranch)
 ON_HOTFIX=`echo $CURRENT_BRANCH | grep '^hotfix/'`
 
-if [ "$ACTION" = "start" ]; then
+if [ "$ACTION" = "start" -o "$ACTION" = "both" ]; then
 	if [ "$ON_HOTFIX" ]; then
 		echo "ERROR: Already on a hotfix branch '$ON_HOTFIX'. Maybe you want to run:"
 		echo "  $0 finish $2 $3 '$4'"
@@ -43,8 +43,8 @@ if [ "$ACTION" = "start" ]; then
 	fi
 	FAILED=0
 	git pull && git co master && git pull \
-		&& echo "### git flow hotfix start $HOTFIX" \
-		&& git flow hotfix start $HOTFIX
+		&& echo "### git flow hotfix start $VERSION" \
+		&& git flow hotfix start $VERSION
 	if [ $? -ne 0 ]; then
 		FAILED=1
 	fi
@@ -58,13 +58,19 @@ if [ "$ACTION" = "start" ]; then
 	if [ "$FAILED" -eq 1 ]; then
 		exit 1
 	fi
-elif [ $ACTION = "finish" ]; then
+fi
+if [ $ACTION = "finish" -o "$ACTION" = "both" ]; then
+	CURRENT_BRANCH=$(getCurrentBranch)
+	ON_HOTFIX=`echo $CURRENT_BRANCH | grep '^hotfix/'`
 	if [ -z "$ON_HOTFIX" ]; then
 		echo "ERROR: Not on a hotfix branch. Maybe you want to run:"
-		echo "  $0 start $2 $3 '$4'"
+		echo "  $0 $VERSION $ACTION '$MESSAGE'"
+		echo "or:"
+		echo "  git co hotfix/$VERSION"
 		exit 1
 	fi
 	if [ -z "$VERSION" -o -z "$MESSAGE" ]; then
+		echo "ERROR: Invalid usage"
 		printUsage
 		updateVersion
 		exit
@@ -74,8 +80,8 @@ elif [ $ACTION = "finish" ]; then
 		&& echo "### git commit" \
 		&& git add $VERSION_FILE $CHANGELOG_FILE \
 		&& git commit -m "Hotfix $VERSION: $MESSAGE" $CHANGED_FILES $VERSION_FILE $CHANGELOG_FILE \
-		&& echo "### git flow hotfix finish -mhotfix/$HOTFIX $HOTFIX" \
-		&& git flow hotfix finish -mhotfix/$HOTFIX $HOTFIX \
+		&& echo "### git flow hotfix finish -mhotfix/$VERSION $VERSION" \
+		&& git flow hotfix finish -mhotfix/$VERSION $VERSION \
 		&& echo "### git push origin master --tags && git push origin develop" \
 		&& git push origin master --tags && git push origin develop
 fi
