@@ -34,14 +34,17 @@ if [ "$ACTION" = "start" -o "$ACTION" = "both" ]; then
 		exit 1
 	fi
 	echo "### Updating to avoid conflicts"
-	echo "### git stash && git co develop && git pull && git co master && git pull"
+	echo "### git stash && git co master && git pull"
 	STASH_OUTPUT=`git stash`
+	FAILED=$?
+	if [ $FAILED -ne 0 ]; then
+		exit $FAILED
+	fi
 	if [ "$STASH_OUTPUT" = "No local changes to save" ]; then
 		STASHED=0
 	else
 		STASHED=1
 	fi
-	FAILED=0
 	git pull && git co master && git pull \
 		&& echo "### git flow hotfix start $VERSION" \
 		&& git flow hotfix start $VERSION
