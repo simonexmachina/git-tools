@@ -26,6 +26,7 @@ fi
 CHANGED_FILES=$(getChangedFiles)
 CURRENT_BRANCH=$(getCurrentBranch)
 ON_HOTFIX=`echo $CURRENT_BRANCH | grep '^hotfix/'`
+PREVIOUS_VERSION_FILE=".$VERSION_FILE.prev"
 
 if [ "$ACTION" = "start" -o "$ACTION" = "both" ]; then
 	if [ "$ON_HOTFIX" ]; then
@@ -33,6 +34,11 @@ if [ "$ACTION" = "start" -o "$ACTION" = "both" ]; then
 		echo "  $0 finish $2 $3 '$4'"
 		exit 1
 	fi
+	if [ -f $PREVIOUS_VERSION_FILE ]; then
+		echo "ERROR: $PREVIOUS_VERSION_FILE already exists"
+		exit 1;
+	fi
+
 	echo "### Updating to avoid conflicts"
 	echo "### git stash && git co master && git pull"
 	STASH_OUTPUT=`git stash`
@@ -61,8 +67,11 @@ if [ "$ACTION" = "start" -o "$ACTION" = "both" ]; then
 	if [ "$FAILED" -eq 1 ]; then
 		exit 1
 	fi
+	cp $VERSION_FILE $PREVIOUS_VERSION_FILE
+
 fi
 if [ $ACTION = "finish" -o "$ACTION" = "both" ]; then
+	PREVIOUS_VERSION=`cat $PREVIOUS_VERSION_FILE`
 	CURRENT_BRANCH=$(getCurrentBranch)
 	ON_HOTFIX=`echo $CURRENT_BRANCH | grep '^hotfix/'`
 	if [ -z "$ON_HOTFIX" ]; then
@@ -78,11 +87,12 @@ if [ $ACTION = "finish" -o "$ACTION" = "both" ]; then
 		updateVersion
 		exit
 	fi
-	echo $VERSION > $VERSION_FILE \
-		&& prependToFile $CHANGELOG_FILE "## $VERSION\n\n$MESSAGE\n" \
-		&& echo "### git commit" \
+	echo "### git commit" \
+		&& [ -z "$CHANGED_FILES" ] || git commit -m "$MESSAGE" $CHANGED_FILES \
+		&& echo $VERSION > $VERSION_FILE \
+		&& prependToFile $CHANGELOG_FILE "## Hotfix $VERSION\n\n$(getCommitMessagesSince $PREVIOUS_VERSION)\n" \
 		&& git add $VERSION_FILE $CHANGELOG_FILE \
-		&& git commit -m "Hotfix $VERSION: $MESSAGE" $CHANGED_FILES $VERSION_FILE $CHANGELOG_FILE \
+		&& git commit -m "Updated $VERSION_FILE and $CHANGELOG_FILE" $VERSION_FILE $CHANGELOG_FILE \
 		&& echo "### git flow hotfix finish -mhotfix/$VERSION $VERSION" \
 		&& git flow hotfix finish -mhotfix/$VERSION $VERSION \
 		&& echo "### git push origin master --tags && git push origin develop" \

@@ -1,17 +1,18 @@
 #!/bin/bash
 
 VERSION=$1
-MESSAGE=$2
 
 printUsage() {
-	echo "Usage: $0 <new version> <message>"
+	echo "Usage: $0 <new version>"
 }
 
 REALPATH=$(readlink $0)
 DIR=`dirname $REALPATH`
 source "$DIR/git-common.sh"
 
-if [ -z "$VERSION" -o -z "$MESSAGE" ]; then
+PREVIOUS_VERSION=`cat $VERSION_FILE`
+
+if [ -z "$VERSION" ]; then
 	printUsage
 	updateVersion
 	exit
@@ -28,9 +29,9 @@ echo "### git co develop && git pull && git co master && git pull && git co deve
 	&& echo "### git flow release start $VERSION" \
 	&& git flow release start $VERSION \
 	&& echo $VERSION > $VERSION_FILE \
-	&& prependToFile $CHANGELOG_FILE "# Release $VERSION\n\n$MESSAGE\n" \
-	&& echo "### git commit -a" \
-	&& git commit -m "Release $VERSION: $MESSAGE" -a \
+	&& prependToFile $CHANGELOG_FILE "# Release $VERSION\n\n`getCommitMessagesSince $PREVIOUS_VERSION`\n" \
+	&& echo "### git commit $VERSION_FILE $CHANGELOG_FILE" \
+	&& git commit -m "Updated $VERSION_FILE and $CHANGELOG_FILE" $VERSION_FILE $CHANGELOG_FILE \
 	&& echo "### git flow release finish -mrelease/$VERSION $VERSION" \
 	&& git flow release finish -mrelease/$VERSION $VERSION \
 	&& echo "### git push origin master --tags && git push origin develop" \

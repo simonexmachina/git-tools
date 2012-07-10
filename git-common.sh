@@ -5,7 +5,7 @@ export VERSION_FILE="VERSION"
 CHANGE_FILE="._changed-files.txt"
 
 prependToFile() {
-	echo -e $2 | cat - $1 > .git-hotfix-tmp
+	echo -e "$2" | cat - $1 > .git-hotfix-tmp
 	mv .git-hotfix-tmp $1
 }
 getChangedFiles() {
@@ -25,7 +25,9 @@ updateVersion() {
 	git fetch
 	echo "### Current version: `git show origin/master:VERSION`"
 }
-
+getCommitMessagesSince() {
+	git log '--pretty=format:- %s (%h)' --no-merges $1.. | grep -v "Updated $VERSION_FILE and $CHANGELOG_FILE"
+}
 if [ "$1" = "-h" ]; then
 	printUsage
 	exit
