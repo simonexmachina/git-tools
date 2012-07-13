@@ -26,7 +26,9 @@ updateVersion() {
 	echo "### Current version: `git show origin/master:VERSION`"
 }
 getCommitMessagesSince() {
-	git log '--pretty=format:- %s (%h)' --no-merges $1.. | grep -v "Updated $VERSION_FILE and $CHANGELOG_FILE"
+	git log '--pretty=format:- %s (%h)' --no-merges $1.. \
+		| grep -v "Updated $VERSION_FILE and $CHANGELOG_FILE" \
+		| sed -e 's/^\([^-]\)/- \1/'
 }
 if [ "$1" = "-h" ]; then
 	printUsage
