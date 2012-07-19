@@ -24,8 +24,8 @@ if [ "$CHANGED_FILES" ]; then
 	exit 1
 fi
 
-echo "### git co develop && git pull && git co master && git pull && git co develop" \
-	&& git co develop && git pull && git co master && git pull && git co develop \
+echo "### git co master && git pull origin master && git co develop && git pull origin develop" \
+	&& git co master && git pull origin master && git co develop && git pull origin develop \
 	&& echo "### git flow release start $VERSION" \
 	&& git flow release start $VERSION \
 	&& echo $VERSION > $VERSION_FILE \

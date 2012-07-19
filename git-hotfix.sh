@@ -31,7 +31,7 @@ PREVIOUS_VERSION_FILE=".$VERSION_FILE.prev"
 if [ "$ACTION" = "start" -o "$ACTION" = "both" ]; then
 	if [ "$ON_HOTFIX" ]; then
 		echo "ERROR: Already on a hotfix branch '$ON_HOTFIX'. Maybe you want to run:"
-		echo "  $0 finish $2 $3 '$4'"
+		echo "  $0 $1 finish '$3'"
 		exit 1
 	fi
 	if [ -f $PREVIOUS_VERSION_FILE ]; then
@@ -40,7 +40,7 @@ if [ "$ACTION" = "start" -o "$ACTION" = "both" ]; then
 	fi
 	
 	echo "### Updating to avoid conflicts"
-	echo "### git stash && git co master && git pull"
+	echo "### git stash && git co develop && git pull origin develop && git co master && git pull origin master"
 	STASH_OUTPUT=`git stash`
 	FAILED=$?
 	if [ $FAILED -ne 0 ]; then
@@ -51,8 +51,7 @@ if [ "$ACTION" = "start" -o "$ACTION" = "both" ]; then
 	else
 		STASHED=1
 	fi
-	git pull && git co master && git pull \
-		&& cp $VERSION_FILE $PREVIOUS_VERSION_FILE \
+	git co develop && git pull origin develop && git co master && git pull origin master \
 		&& echo "### git flow hotfix start $VERSION" \
 		&& git flow hotfix start $VERSION
 	if [ $? -ne 0 ]; then
@@ -65,6 +64,7 @@ if [ "$ACTION" = "start" -o "$ACTION" = "both" ]; then
 			FAILED=1
 		fi
 	fi
+	cp $VERSION_FILE $PREVIOUS_VERSION_FILE	
 	if [ "$FAILED" -eq 1 ]; then
 		exit 1
 	fi
