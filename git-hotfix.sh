@@ -94,7 +94,7 @@ if [ $ACTION = "finish" -o "$ACTION" = "both" ]; then
 	echo "### git commit" \
 		&& [ -z "$CHANGED_FILES" ] || git commit -m "$MESSAGE" -a \
 		&& echo $VERSION > $VERSION_FILE \
-		&& prependToFile $CHANGELOG_FILE "## Hotfix $VERSION\n\n$(getCommitMessagesSince $PREVIOUS_VERSION)\n" \
+		&& prependToChangeLog "## Hotfix $VERSION\n\n$(getCommitMessagesSince $PREVIOUS_VERSION)\n" \
 		&& rm $PREVIOUS_VERSION_FILE \
 		&& git add $VERSION_FILE $CHANGELOG_FILE \
 		&& git commit -m "Updated $VERSION_FILE and $CHANGELOG_FILE" $VERSION_FILE $CHANGELOG_FILE \

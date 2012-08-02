@@ -8,6 +8,11 @@ prependToFile() {
 	echo -e "$2" | cat - $1 > .git-hotfix-tmp
 	mv .git-hotfix-tmp $1
 }
+prependToChangeLog() {
+	prependToFile "$CHANGELOG_FILE" "$1"
+	echo "Please review the CHANGELOG.md before continuing"
+	$EDITOR $CHANGELOG_FILE
+}
 getChangedFiles() {
 	(git diff --name-only --diff-filter=ACDMRTUX > $CHANGE_FILE \
 		&& git diff --cached --name-only --diff-filter=ACDMRTUX >> $CHANGE_FILE) \
